@@ -53,7 +53,8 @@ paperlens/
 ## ✅ Installation & Setup
 
 ### 1️⃣ Clone the Repository
-git clone https://github.com/Likhithmessi10/Automated_Research_Paper_Reviewer.git
+git clone https://github.com/your-username/paperlens.git  
+cd paperlens
 
 ---
 
