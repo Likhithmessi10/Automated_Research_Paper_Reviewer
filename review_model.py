@@ -248,6 +248,7 @@ def review_pdf(pdf_path: str) -> dict:
 
 
 
+
 # Simple local test
 if __name__ == "__main__":
     result = review_pdf("sample_paper.pdf")
