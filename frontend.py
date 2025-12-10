@@ -253,7 +253,7 @@ if uploaded_file is not None:
                     <p style='color: #6b7280; margin: 0;'>Final Decision</p>
                 </div>
             """, unsafe_allow_html=True)
-        
+
         with col2:
             confidence = round(review_results["confidence"] * 100)
             st.metric(
@@ -269,6 +269,21 @@ if uploaded_file is not None:
                 value=f"{raw_score}",
                 delta=f"+{raw_score}" if raw_score > 0 else None
             )
+            st.subheader("🧬 Plagiarism Analysis")
+
+            plag = review_results["plagiarism_percent"]
+            orig = review_results["originality_percent"]
+            risk = review_results["plagiarism_risk"]
+
+            st.metric("Plagiarism", f"{plag}%")
+            st.metric("Originality", f"{orig}%")
+
+            if risk == "LOW":
+                st.success("🟢 Low Plagiarism Risk")
+            elif risk == "MEDIUM":
+                st.warning("🟡 Medium Plagiarism Risk")
+            else:
+                st.error("🔴 High Plagiarism Risk")
         
         with col4:
             total_feedback = (

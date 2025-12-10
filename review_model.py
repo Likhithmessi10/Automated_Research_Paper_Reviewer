@@ -1,7 +1,7 @@
 import fitz  # PyMuPDF
 import re
 import spacy
-
+from online_plagiarism import check_plagiarism_smallseotools
 # -----------------------
 # Load spaCy model once
 # -----------------------
@@ -188,6 +188,7 @@ def review_pdf(pdf_path: str) -> dict:
     Main function to call from backend.
     Returns a dictionary with all review details.
     """
+
     # 1. Extract text
     text = extract_text_from_pdf(pdf_path)
 
@@ -209,13 +210,21 @@ def review_pdf(pdf_path: str) -> dict:
         all_weaknesses.extend(w)
         all_improvements.extend(i)
 
-    # 4. Compute score + verdict
+    # 4. Compute score + verdict (initial)
     final_score, confidence = compute_final_score(
         all_strengths, all_weaknesses, all_improvements
     )
     verdict = generate_verdict(confidence)
 
-    # 5. Build human-readable report
+    # 5. ✅ ONLINE PLAGIARISM CHECK (FIXED)
+    plagiarism_percent, originality_percent, plagiarism_risk = \
+        check_plagiarism_smallseotools(text)
+
+    # ✅ 6. AUTO-REJECT IF PLAGIARISM IS HIGH (REAL-WORLD LOGIC)
+    if plagiarism_percent > 40:
+        verdict = "❌ REJECT (PLAGIARISM)"
+
+    # 7. Build final report AFTER plagiarism logic
     report = generate_final_report(
         all_strengths,
         all_weaknesses,
@@ -231,8 +240,12 @@ def review_pdf(pdf_path: str) -> dict:
         "final_score": final_score,
         "confidence": confidence,
         "verdict": verdict,
+        "plagiarism_percent": plagiarism_percent,     # ✅ FIXED
+        "originality_percent": originality_percent,   # ✅ FIXED
+        "plagiarism_risk": plagiarism_risk,           # ✅ FIXED
         "report": report,
     }
+
 
 
 # Simple local test
