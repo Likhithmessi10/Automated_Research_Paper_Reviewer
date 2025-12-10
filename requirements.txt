@@ -3,3 +3,4 @@ pandas
 plotly
 PyMuPDF
 spacy
+googlesearch-python

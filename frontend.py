@@ -275,15 +275,19 @@ if uploaded_file is not None:
             orig = review_results["originality_percent"]
             risk = review_results["plagiarism_risk"]
 
+            # ... existing metric code ...
             st.metric("Plagiarism", f"{plag}%")
             st.metric("Originality", f"{orig}%")
 
+            # --- UPDATED LOGIC HERE ---
             if risk == "LOW":
                 st.success("🟢 Low Plagiarism Risk")
             elif risk == "MEDIUM":
                 st.warning("🟡 Medium Plagiarism Risk")
-            else:
+            elif risk == "HIGH":
                 st.error("🔴 High Plagiarism Risk")
+            else:
+                st.info(f"⚪ Plagiarism Check: {risk}")
         
         with col4:
             total_feedback = (
