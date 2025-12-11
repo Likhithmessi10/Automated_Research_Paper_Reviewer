@@ -155,64 +155,58 @@ def generate_verdict(confidence_score: float) -> str:
 # -----------------------
 # Ollama Rewriting Helpers
 # -----------------------
-def rewrite_with_ollama(text: str, model: str = "llama3.1:8b", timeout: int = 30) -> str:
+def rewrite_with_ollama(text: str, model: str = "llama3.1:8b", timeout: int = 60) -> str:
     """
     Sends a single rewrite job to local Ollama and returns the rewritten text.
     If Ollama fails, returns the original text.
     """
     try:
+        # STRICT PROMPT: Forces the AI to output ONLY the text, no "Here is..." or explanations.
         prompt = (
-            "You are an academic writing assistant. Rewrite the following reviewer-style sentence "
-            "into clear, concise, and original academic English suitable for a peer-review comment. "
-            "Keep meaning but avoid copying exact wording.\n\n"
-            f"Input: {text}\n\n"
-            "Rewritten:"
+            "You are a strict academic editor. Rewrite the specific input sentence below into "
+            "concise, objective, and professional academic English.\n\n"
+            "STRICT RULES:\n"
+            "1. Output ONLY the rewritten sentence. Do NOT add introductions, quotes, or explanations.\n"
+            "2. Do NOT use conversational fillers like 'Here is the rewritten version'.\n"
+            "3. Avoid first-person pronouns (like 'we', 'our', 'I') used by the authors; prefer passive voice or third-person (e.g., replace 'We show...' with 'It is shown...').\n"
+            "4. Keep the meaning accurate but make it sound more formal.\n\n"
+            f"Input: \"{text}\"\n\n"
+            "Output:"
         )
+        
         payload = {
             "model": model,
             "prompt": prompt,
+            "stream": False,
             "max_tokens": 256,
-            "temperature": 0.15,
-            "top_p": 0.95,
-            "stop": None
+            "temperature": 0.1, # Low temperature = less "creative"/chatty
+            "top_p": 0.9,
+            "stop": ["Input:", "\n\n"] # Stop generating if it tries to start a new section
         }
 
         resp = requests.post("http://localhost:11434/api/generate", json=payload, timeout=timeout)
+        
         if resp.status_code != 200:
             return text
 
         data = resp.json()
+        out = data.get("response", "").strip()
+        
+        # Extra cleanup: sometimes AI puts quotes around the output, remove them
+        if out.startswith('"') and out.endswith('"'):
+            out = out[1:-1]
+            
+        # Extra cleanup: If it still adds "Here is...", remove it manually
+        if ":" in out[:20]: # e.g., "Rewritten: The study..."
+            out = out.split(":", 1)[1].strip()
 
-        # Ollama's API format may vary; try common fields
-        # Preferred: data.get("output") or data.get("response") or data.get("generated_text")
-        out = ""
-        if isinstance(data, dict):
-            # common keys
-            if "response" in data and isinstance(data["response"], str):
-                out = data["response"]
-            elif "output" in data:
-                if isinstance(data["output"], str):
-                    out = data["output"]
-                elif isinstance(data["output"], list) and data["output"]:
-                    out = data["output"][0].get("content", "") if isinstance(data["output"][0], dict) else str(data["output"][0])
-            elif "generated_text" in data:
-                out = data["generated_text"]
-            elif "completion" in data:
-                out = data["completion"]
-            else:
-                # Fallback: try to stringify the whole JSON
-                out = json.dumps(data)
-        else:
-            out = str(data)
-
-        out = out.strip()
         if not out:
             return text
 
         return out
 
-    except Exception:
-        # On any failure, return original text to avoid crashing pipeline
+    except Exception as e:
+        print(f"Error calling Ollama: {e}")
         return text
 
 
