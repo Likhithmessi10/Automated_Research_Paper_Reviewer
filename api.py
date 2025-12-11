@@ -1,4 +1,3 @@
-# api.py
 from fastapi import FastAPI, UploadFile, File, Form
 from review_model import review_pdf
 import shutil
@@ -21,10 +20,12 @@ async def analyze_paper(
         # Ensure ollama is running: 'ollama serve'
         results = review_pdf(temp_filename, rewrite=rewrite, ollama_model="llama3.1:8b")
 
-        # Return just the text report for simplicity in the mobile app
-        return {"report": results["report"]}
+        # 🟢 CHANGED: Return the FULL results dictionary (JSON)
+        # This allows the app to see scores, verdicts, and graphs.
+        return results 
+        
     except Exception as e:
-        return {"report": f"Error: {str(e)}"}
+        return {"error": str(e)}
     finally:
         if os.path.exists(temp_filename):
             os.remove(temp_filename)
