@@ -1,6 +1,6 @@
-# 📝 PaperLens – Expert AI Research Paper Reviewer
+# 📝 Automated Research Paper Reviewer
 
-**PaperLens** is a state-of-the-art **Hybrid AI Review System** that combines fast heuristic analysis with deep Large Language Model (LLM) reasoning. It is designed to replicate the analytical rigor of an expert peer reviewer at top-tier conferences like **NeurIPS** or **ICML**.
+**Automated Research Paper Reviewer** is a state-of-the-art **Hybrid AI Review System** that combines fast heuristic analysis with deep Large Language Model (LLM) reasoning. It is designed to replicate the analytical rigor of an expert peer reviewer at top-tier conferences like **NeurIPS** or **ICML**.
 
 The system analyzes research papers (PDF) to provide:
 - 🧠 **NeurIPS-Style Expert Scorecard** (Originality, Methodology, Clarity, Significance)
@@ -10,6 +10,26 @@ The system analyzes research papers (PDF) to provide:
 - ✍️ **AI-Powered Academic Rewriting** (Professional Tone Polish)
 
 Built as a **Final Year CSE (AI/ML) Project**, this tool helps researchers, students, and reviewers automate the initial phase of academic evaluation.
+
+---
+
+## 📋 Table of Contents
+
+- [🚀 Key Features](#-key-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📁 Project Structure](#-project-structure)
+- [✅ Installation & Setup](#-installation--setup)
+- [📊 Dashboard Overview](#-dashboard-overview)
+- [🔌 API Usage](#-api-usage-mobile-integration)
+- [💡 Usage Examples](#-usage-examples)
+- [🔧 Configuration & Customization](#-configuration--customization)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [🤝 Contributing](#-contributing)
+- [📚 References & Acknowledgments](#-references--acknowledgments)
+- [📞 Support & Contact](#-support--contact)
+- [🔮 Future Enhancements](#-future-enhancements)
+- [👨‍💻 Developed By](#-developed-by)
+- [📜 License](#-license)
 
 ---
 
@@ -49,12 +69,19 @@ Built as a **Final Year CSE (AI/ML) Project**, this tool helps researchers, stud
 ```bash
 Automated_Research_paper_reviewer/
 │
-├── api.py               # FastAPI backend for Mobile/Web integration
-├── frontend.py          # Streamlit Dashboard (v2 with Scorecards)
-├── review_model.py      # Core Hybrid Logic (Heuristics + Llama 3 Analysis)
-├── online_plagiarism.py # Plagiarism detection module
-├── requirements.txt     # Python dependencies
-└── README.md            # Project documentation
+├── api.py                    # FastAPI backend for Mobile/Web integration
+├── server.py                 # Alternative FastAPI server implementation
+├── frontend.py               # Streamlit Dashboard (v2 with Scorecards)
+├── review_model.py           # Core Hybrid Logic (Heuristics + Llama 3 Analysis)
+├── online_plagiarism.py      # Plagiarism detection module
+├── phase1.md                 # Project requirements and user personas documentation
+├── requirements.txt          # Python dependencies
+├── README.md                 # Project documentation
+├── .gitignore               # Git ignore rules
+├── .streamlit/              # Streamlit configuration
+│   └── config.toml          # Streamlit app configuration
+├── venv/                    # Virtual environment (optional)
+└── __pycache__/             # Python cache files
 ```
 
 ---
@@ -97,6 +124,18 @@ streamlit run frontend.py
 uvicorn api:app --host 0.0.0.0 --port 8000
 ```
 *API Docs available at `http://localhost:8000/docs`*
+
+---
+
+## 🚀 Quick Start (5 Minutes)
+
+1. **Download a sample PDF** or use your own research paper
+2. **Start Ollama** (if using AI features): `ollama serve && ollama pull llama3.1:8b`
+3. **Launch the app**: `streamlit run frontend.py`
+4. **Upload your PDF** and click "Analyze Paper"
+5. **Review the results**: Check the expert scorecard, deep analysis, and AI suggestions
+
+**Expected Output:** A comprehensive report with scores, recommendations, and rewritten sections.
 
 ---
 
@@ -151,23 +190,225 @@ curl -X POST "http://localhost:8000/analyze" \
 
 ---
 
-## 🔮 Future Enhancements
+## 💡 Usage Examples
 
-- 🧠 **Journal-Specific Fine-tuning:** Adapt scoring for IEEE vs. Nature.
-- ⚡ **Cloud LLM Support:** Option to switch from local Ollama to GPT-4/Claude API.
-- 📱 **Native Mobile App:** Flutter-based interface for on-the-go reviews.
-- 🏳️ **Multi-Language Reviews:** Support for non-English papers.
+### **Example 1: Student Paper Review**
+A student submits their first research paper on machine learning:
+
+**Input:** `student_paper.pdf` (5-page undergraduate thesis)
+
+**Output:**
+- **Verdict:** Weak Accept
+- **Originality Score:** 6/10 (Some novel ideas but builds on existing work)
+- **Methodology Score:** 5/10 (Basic experiments, missing ablation studies)
+- **AI Suggestions:** "Consider adding baseline comparisons" and "Rewrite introduction for clarity"
+
+### **Example 2: Conference Paper Evaluation**
+A professor reviews submissions for ICML:
+
+**Input:** `icml_submission.pdf` (12-page conference paper)
+
+**Output:**
+- **Verdict:** Accept
+- **Originality Score:** 9/10 (Novel approach with strong theoretical contribution)
+- **Methodology Score:** 8/10 (Rigorous experiments with proper baselines)
+- **Deep Analysis:** "Methodology section shows excellent experimental design"
+
+### **Example 3: Plagiarism Detection**
+System detects potential plagiarism in a submitted paper:
+
+**Input:** `suspicious_paper.pdf`
+
+**Output:**
+- **Plagiarism Risk:** HIGH (45% detected)
+- **Verdict:** ❌ REJECT (PLAGIARISM)
+- **Originality Score:** 55%
+- **Flagged Sentences:** 3 out of 5 sample sentences found online
 
 ---
 
-## 👨‍💻 Developed By
+## 🔧 Configuration & Customization
 
-**Team:** PaperLens  
+## � Configuration & Customization
+
+### **Ollama Model Settings**
+You can customize the AI model used for deep analysis:
+
+```python
+# In review_model.py, modify these parameters:
+OLLAMA_MODEL = "llama3.1:8b"  # or "mistral:7b", "codellama:13b"
+OLLAMA_TIMEOUT = 60  # seconds
+OLLAMA_TEMPERATURE = 0.1  # lower = more consistent
+```
+
+### **Scoring Thresholds**
+Adjust the acceptance criteria in `review_model.py`:
+
+```python
+# Confidence thresholds for verdicts
+ACCEPT_THRESHOLD = 0.65      # >65% = Accept
+WEAK_ACCEPT_THRESHOLD = 0.45  # 45-65% = Weak Accept
+# <45% = Reject
+```
+
+### **Plagiarism Sensitivity**
+Configure plagiarism detection in `online_plagiarism.py`:
+
+```python
+# Number of sentences to sample for checking
+SAMPLE_SIZE = 3
+# Risk threshold for auto-rejection
+PLAGIARISM_REJECT_THRESHOLD = 40  # %
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### **Common Issues & Solutions**
+
+**❌ Ollama Connection Failed**
+```
+Error: Connection refused on localhost:11434
+```
+**Solution:**
+1. Ensure Ollama is running: `ollama serve`
+2. Check if the model is downloaded: `ollama list`
+3. Pull the model if missing: `ollama pull llama3.1:8b`
+4. Verify firewall allows local connections
+
+**❌ spaCy Model Not Found**
+```
+Error: Can't find model 'en_core_web_sm'
+```
+**Solution:**
+```bash
+python -m spacy download en_core_web_sm
+```
+
+**❌ PDF Processing Failed**
+```
+Error: PDF parsing error
+```
+**Solution:**
+- Ensure PDF is not password-protected
+- Check if PDF is corrupted or scanned (OCR required)
+- Verify PyMuPDF installation: `pip install --upgrade PyMuPDF`
+
+**❌ Streamlit Port Already in Use**
+```
+Error: Port 8501 is already in use
+```
+**Solution:**
+```bash
+# Use a different port
+streamlit run frontend.py --server.port 8502
+```
+
+**❌ FastAPI CORS Issues (Mobile App)**
+```
+Error: CORS policy blocked
+```
+**Solution:** Add CORS middleware in `api.py`:
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### **Development Setup**
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Set up development environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   python -m spacy download en_core_web_sm
+   ```
+
+### **Code Standards**
+- Follow PEP 8 style guidelines
+- Add type hints for function parameters
+- Write docstrings for all functions
+- Add unit tests for new features
+
+### **Testing**
+```bash
+# Run basic functionality tests
+python -c "from review_model import review_pdf; print('Import successful')"
+
+# Test API endpoints
+python -c "import requests; print(requests.get('http://localhost:8000').status_code)"
+```
+
+### **Pull Request Process**
+1. Update the README.md with details of changes
+2. Update version numbers in any examples files
+3. The PR will be merged after review and testing
+
+---
+
+## 📚 References & Acknowledgments
+
+### **Academic References**
+- **NeurIPS Review Criteria:** Based on official NeurIPS reviewer guidelines
+- **ICML Scoring Rubrics:** Adapted from ICML conference review forms
+- **Academic Writing Standards:** Following APA and IEEE style guides
+
+### **Technical References**
+- **spaCy Documentation:** Natural Language Processing library
+- **PyMuPDF (Fitz):** PDF text extraction
+- **Ollama:** Local LLM inference framework
+- **FastAPI:** Modern Python web framework
+
+### **Inspiration**
+- **PeerReview.io:** Academic peer review platform
+- **OpenReview.net:** Open peer review system
+- **Grammarly for Academia:** AI writing assistance
+
+---
+
+## 📞 Support & Contact
+
+- **Repository:** [GitHub](https://github.com/Likhithmessi10/Automated_Research_Paper_Reviewer)
+- **Issues:** [Report Bugs](https://github.com/Likhithmessi10/Automated_Research_Paper_Reviewer/issues)
+- **Discussions:** [Q&A Forum](https://github.com/Likhithmessi10/Automated_Research_Paper_Reviewer/discussions)
+
+For questions or collaboration opportunities, please open an issue on GitHub.
+
+---
+
+## �‍💻 Developed By
+
+**Team:** Automated Research Paper Reviewer  
 **Stream:** CSE (AI & ML)  
-**Project:** Final Year Major Project (2025)
+**Project:** Final Year Major Project (2025)  
+**Repository:** [GitHub](https://github.com/Likhithmessi10/Automated_Research_Paper_Reviewer)
 
 ---
 
-## 📜 License
+## �📜 License
 
-This project is intended for educational and research purposes.
+This project is intended for educational and research purposes. Please cite appropriately if used in academic work:
+
+```bibtex
+@software{automated_research_reviewer,
+  title={Automated Research Paper Reviewer},
+  author={PaperLens Team},
+  year={2025},
+  url={https://github.com/Likhithmessi10/Automated_Research_Paper_Reviewer}
+}
+```
